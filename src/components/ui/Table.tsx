@@ -1,54 +1,66 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface TableProps {
-  headers: string[];
+interface TableProps extends React.TableHTMLAttributes<HTMLTableElement> {
   children: React.ReactNode;
 }
 
-export const Table: React.FC<TableProps> = ({ headers, children }) => {
-  return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            {headers.map((header, index) => (
-              <th
-                key={index}
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+export const Table = React.forwardRef<HTMLTableElement, TableProps>(
+  ({ children, className, ...props }, ref) => {
+    return (
+      <div className="overflow-x-auto">
+        <table
+          ref={ref}
+          className={cn("min-w-full divide-y divide-gray-200", className)}
+          {...props}
+        >
           {children}
-        </tbody>
-      </table>
-    </div>
-  );
-};
+        </table>
+      </div>
+    );
+  }
+);
+Table.displayName = 'Table';
 
-interface TableRowProps {
+interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> {
+  children: React.ReactNode;
+  onClick?: () => void;
+}
+
+export const TableRow = React.forwardRef<HTMLTableRowElement, TableRowProps>(
+  ({ children, className, onClick, ...props }, ref) => {
+    return (
+      <tr
+        ref={ref}
+        className={cn("hover:bg-gray-50", className)}
+        onClick={onClick}
+        {...props}
+      >
+        {children}
+      </tr>
+    );
+  }
+);
+TableRow.displayName = 'TableRow';
+
+interface TableCellProps extends React.TdHTMLAttributes<HTMLTableCellElement> {
   children: React.ReactNode;
 }
 
-export const TableRow: React.FC<TableRowProps> = ({ children }) => {
-  return <tr className="hover:bg-gray-50">{children}</tr>;
-};
-
-interface TableCellProps {
-  children: React.ReactNode;
-}
-
-export const TableCell: React.FC<TableCellProps> = ({ children }) => {
-  return (
-    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-      {children}
-    </td>
-  );
-};
+export const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(
+  ({ children, className, ...props }, ref) => {
+    return (
+      <td
+        ref={ref}
+        className={cn("px-6 py-4 whitespace-nowrap text-sm text-gray-900", className)}
+        {...props}
+      >
+        {children}
+      </td>
+    );
+  }
+);
+TableCell.displayName = 'TableCell';
 
 export const TableHeader = React.forwardRef<
   HTMLTableSectionElement,

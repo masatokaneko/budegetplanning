@@ -1,5 +1,131 @@
-import { useState, useCallback } from 'react'
-import { Budget, BudgetInput, BudgetGridData } from '@/types/budget'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Budget, BudgetInput, BudgetGridData } from '@/types/budget';
+import { validateBudgetInput, sanitizeBudgetInput } from '@/lib/validation';
+
+// API関数
+const fetchBudget = async (id: string): Promise<Budget> => {
+  const response = await fetch(`/api/budgets/${id}`);
+  if (!response.ok) {
+    throw new Error('予算データの取得に失敗しました');
+  }
+  return response.json();
+};
+
+const fetchBudgets = async (): Promise<Budget[]> => {
+  const response = await fetch('/api/budgets');
+  if (!response.ok) {
+    throw new Error('予算データの取得に失敗しました');
+  }
+  return response.json();
+};
+
+const createBudget = async (data: BudgetInput): Promise<Budget> => {
+  validateBudgetInput(data);
+  const sanitizedData = sanitizeBudgetInput(data);
+  
+  const response = await fetch('/api/budgets', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(sanitizedData),
+  });
+
+  if (!response.ok) {
+    throw new Error('予算データの作成に失敗しました');
+  }
+
+  return response.json();
+};
+
+const updateBudget = async ({ id, data }: { id: string; data: BudgetInput }): Promise<Budget> => {
+  validateBudgetInput(data);
+  const sanitizedData = sanitizeBudgetInput(data);
+
+  const response = await fetch(`/api/budgets/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(sanitizedData),
+  });
+
+  if (!response.ok) {
+    throw new Error('予算データの更新に失敗しました');
+  }
+
+  return response.json();
+};
+
+const deleteBudget = async (id: string): Promise<void> => {
+  const response = await fetch(`/api/budgets/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('予算データの削除に失敗しました');
+  }
+};
+
+// カスタムフック
+export function useBudget(id: string) {
+  return useQuery({
+    queryKey: ['budget', id],
+    queryFn: () => fetchBudget(id),
+  });
+}
+
+export function useBudgets() {
+  return useQuery({
+    queryKey: ['budgets'],
+    queryFn: fetchBudgets,
+  });
+}
+
+export function useCreateBudget() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createBudget,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
+    },
+  });
+}
+
+export function useUpdateBudget() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateBudget,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
+      queryClient.invalidateQueries({ queryKey: ['budget', data.id] });
+    },
+  });
+}
+
+export function useDeleteBudget() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteBudget,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
+    },
+  });
+}
+
+// グリッド表示用データの変換
+const getGridData = (budgets: Budget[]): BudgetGridData[] => {
+  return budgets.map(budget => ({
+    ...budget,
+    status: 'draft', // TODO: 実際のステータスを設定
+    submittedBy: undefined,
+    approvedBy: undefined,
+    comments: undefined,
+  }))
+}
 
 export const useBudget = () => {
   const [budgets, setBudgets] = useState<Budget[]>([])
@@ -88,17 +214,6 @@ export const useBudget = () => {
     } finally {
       setLoading(false)
     }
-  }, [])
-
-  // グリッド表示用データの変換
-  const getGridData = useCallback((budgets: Budget[]): BudgetGridData[] => {
-    return budgets.map(budget => ({
-      ...budget,
-      status: 'draft', // TODO: 実際のステータスを設定
-      submittedBy: undefined,
-      approvedBy: undefined,
-      comments: undefined,
-    }))
   }, [])
 
   return {

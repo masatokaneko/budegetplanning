@@ -1,35 +1,29 @@
 // src/types/budget.ts
 // 予算関連の型定義
 
+export type BudgetStatus = 'draft' | 'submitted' | 'approved' | 'rejected';
+
 export type Budget = {
-  id: string
-  year: number
-  month: number
-  department: string
-  category: string
-  amount: number
-  description?: string
-  createdAt: Date
-  updatedAt: Date
-}
+  id: string;
+  year: number;
+  month: number;
+  department: string;
+  category: string;
+  account: string; // 勘定科目を追加
+  amount: number;
+  status: BudgetStatus; // ステータスを追加
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-export type BudgetInput = Omit<Budget, 'id' | 'createdAt' | 'updatedAt'>
+export type BudgetInput = Omit<Budget, 'id' | 'createdAt' | 'updatedAt'>;
 
-export type BudgetGridData = {
-  id: string
-  year: number
-  month: number
-  department: string
-  category: string
-  amount: number
-  description?: string
-  createdAt: Date
-  updatedAt: Date
-  status: 'draft' | 'submitted' | 'approved' | 'rejected'
-  submittedBy?: string
-  approvedBy?: string
-  comments?: string
-}
+export type BudgetGridData = Budget & {
+  submittedBy?: string;
+  approvedBy?: string;
+  comments?: string;
+};
 
 export interface BudgetVersion {
   version_id: string;
@@ -41,7 +35,7 @@ export interface BudgetVersion {
   created_at: Date;
 }
 
-export interface BudgetGridData {
+export interface BudgetAccount {
   account_id: string;
   account_name: string;
   account_category: 'cost_of_sales' | 'selling_admin';

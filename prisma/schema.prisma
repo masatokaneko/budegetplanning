@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  username      String    @unique
+  passwordHash  String
+  fullName      String
+  role          Role      @relation(fields: [roleId], references: [id])
+  roleId        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  budgets       Budget[]
+  actuals       Actual[]
+  systemLogs    SystemLog[]
+}
+
+model Role {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  users       User[]
+  permissions Permission[]
+}
+
+model Permission {
+  id         String   @id @default(cuid())
+  role       Role     @relation(fields: [roleId], references: [id])
+  roleId     String
+  function   Function @relation(fields: [functionId], references: [id])
+  functionId String
+}
+
+model Function {
+  id          String       @id @default(cuid())
+  name        String
+  permissions Permission[]
+}
+
+model Account {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  name          String
+  category      String   // 売上原価、販管費など
+  isActive      Boolean  @default(true)
+  budgets       Budget[]
+  actuals       Actual[]
+}
+
+model Vendor {
+  id                  String   @id @default(cuid())
+  code                String?  @unique
+  name                String
+  freeeAuxAccountName String?
+  isActive            Boolean  @default(true)
+  budgets             Budget[]
+  actuals             Actual[]
+}
+
+model FluctuationFactor {
+  id          String           @id @default(cuid())
+  name        String
+  unit        String
+  forecasts   FactorForecast[]
+  budgets     Budget[]
+}
+
+model FactorForecast {
+  id          String            @id @default(cuid())
+  factor      FluctuationFactor @relation(fields: [factorId], references: [id])
+  factorId    String
+  yearMonth   Int               // YYYYMM形式
+  forecastValue Float
+}
+
+model Budget {
+  id              String            @id @default(cuid())
+  account         Account           @relation(fields: [accountId], references: [id])
+  accountId       String
+  vendor          Vendor?           @relation(fields: [vendorId], references: [id])
+  vendorId        String?
+  yearMonth       Int               // YYYYMM形式
+  amount          Float
+  version         String            @default("1.0")
+  calculationType String            // 手入力、変動要因連動など
+  factor          FluctuationFactor? @relation(fields: [factorId], references: [id])
+  factorId        String?
+  basisValue      Float?
+  createdBy       User              @relation(fields: [userId], references: [id])
+  userId          String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model Actual {
+  id              String    @id @default(cuid())
+  account         Account   @relation(fields: [accountId], references: [id])
+  accountId       String
+  vendor          Vendor?   @relation(fields: [vendorId], references: [id])
+  vendorId        String?
+  transactionDate DateTime
+  yearMonth       Int       // YYYYMM形式
+  amount          Float
+  description     String?
+  sourceFileName  String
+  importedAt      DateTime  @default(now())
+  importedBy      User      @relation(fields: [userId], references: [id])
+  userId          String
+}
+
+model SystemLog {
+  id          String   @id @default(cuid())
+  timestamp   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  actionType  String
+  details     String?
+} 

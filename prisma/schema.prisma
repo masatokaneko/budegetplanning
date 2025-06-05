@@ -10,6 +10,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ユーザーテーブル
+model User {
+  id              String      @id @default(uuid())
+  email           String      @unique
+  name            String
+  role            String      // ユーザーロール
+  is_active       Boolean     @default(true)
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+  system_logs     SystemLog[]
+
+  @@map("users")
+}
+
+// ロールテーブル
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  permissions Permission[]
+
+  @@map("roles")
+}
+
+// 権限テーブル
+model Permission {
+  id         String   @id @default(uuid())
+  role       Role     @relation(fields: [role_id], references: [id])
+  role_id    String
+  function   Function @relation(fields: [function_id], references: [id])
+  function_id String
+
+  @@map("permissions")
+}
+
+// 機能テーブル
+model Function {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  permissions Permission[]
+
+  @@map("functions")
+}
+
 // 勘定科目マスタ
 model Account {
   id              String    @id @default(uuid())
@@ -30,53 +73,71 @@ model Account {
 
 // 取引先マスタ
 model Vendor {
-  id              String    @id @default(uuid())
-  code            String    @unique // 取引先コード
-  name            String    // 取引先名
-  type            String    // 取引先タイプ
-  description     String?   // 説明
-  is_active       Boolean   @default(true)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  created_by      String    // 作成者ID
-  budgets         Budget[]  // 予算とのリレーション
-  actuals         Actual[]  // 実績とのリレーション
+  id                  String    @id @default(uuid())
+  code                String?   @unique // 取引先コード
+  name                String    // 取引先名
+  type                String?   // 取引先タイプ
+  freee_aux_account_name String? // freee補助科目名
+  description         String?   // 説明
+  is_active           Boolean   @default(true)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  created_by          String    // 作成者ID
+  budgets             Budget[]  // 予算とのリレーション
+  actuals             Actual[]  // 実績とのリレーション
 
   @@map("vendors")
 }
 
 // 変動要因マスタ
 model FluctuationFactor {
-  id              String    @id @default(uuid())
-  code            String    @unique // 変動要因コード
-  name            String    // 変動要因名
-  type            String    // 変動要因タイプ
-  description     String?   // 説明
-  is_active       Boolean   @default(true)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  created_by      String    // 作成者ID
-  budgets         Budget[]  // 予算とのリレーション
+  id              String           @id @default(uuid())
+  code            String           @unique // 変動要因コード
+  name            String           // 変動要因名
+  type            String           // 変動要因タイプ
+  unit            String           // 単位
+  description     String?          // 説明
+  is_active       Boolean          @default(true)
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  created_by      String           // 作成者ID
+  budgets         Budget[]         // 予算とのリレーション
+  forecasts       FactorForecast[] // 予測値とのリレーション
 
   @@map("fluctuation_factors")
 }
 
+// 変動要因予測値
+model FactorForecast {
+  id            String            @id @default(uuid())
+  factor        FluctuationFactor @relation(fields: [factor_id], references: [id])
+  factor_id     String
+  year_month    Int               // YYYYMM形式
+  forecast_value Float
+  created_at    DateTime          @default(now())
+  updated_at    DateTime          @updatedAt
+  created_by    String            // 作成者ID
+
+  @@unique([factor_id, year_month])
+  @@map("factor_forecasts")
+}
+
 // 予算テーブル
 model Budget {
-  id                  String    @id @default(uuid())
-  account_id          String    // 勘定科目ID
-  vendor_id           String?   // 取引先ID（オプション）
-  year_month          String    // 年月（YYYYMM形式）
-  amount              Decimal   // 予算金額
-  version             String    // 予算バージョン
-  calculation_type    String    // 計算タイプ（manual, factor_linked）
-  linked_factor_id    String?   // 連動変動要因ID（オプション）
-  basis_value         Decimal?  // 基準値（オプション）
-  created_at          DateTime  @default(now())
-  updated_at          DateTime  @updatedAt
-  created_by          String    // 作成者ID
-  account             Account   @relation(fields: [account_id], references: [id])
-  vendor              Vendor?   @relation(fields: [vendor_id], references: [id])
+  id                  String             @id @default(uuid())
+  account_id          String             // 勘定科目ID
+  vendor_id           String?            // 取引先ID（オプション）
+  year_month          String             // 年月（YYYYMM形式）
+  amount              Decimal            // 予算金額
+  version             String             // 予算バージョン
+  calculation_type    String             // 計算タイプ（manual, factor_linked）
+  linked_factor_id    String?            // 連動変動要因ID（オプション）
+  basis_value         Decimal?           // 基準値（オプション）
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @updatedAt
+  created_by          String             // 作成者ID
+  account             Account            @relation(fields: [account_id], references: [id])
+  vendor              Vendor?            @relation(fields: [vendor_id], references: [id])
   fluctuation_factor  FluctuationFactor? @relation(fields: [linked_factor_id], references: [id])
 
   @@unique([account_id, vendor_id, year_month, version])
@@ -103,81 +164,14 @@ model Actual {
   @@map("actuals")
 }
 
-// ユーザーテーブル
-model User {
-  id              String    @id @default(uuid())
-  email           String    @unique
-  name            String
-  role            String    // ユーザーロール
-  is_active       Boolean   @default(true)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-
-  @@map("users")
-}
-
-model Role {
-  id          String      @id @default(cuid())
-  name        String      @unique
-  users       User[]
-  permissions Permission[]
-}
-
-model Permission {
-  id         String   @id @default(cuid())
-  role       Role     @relation(fields: [roleId], references: [id])
-  roleId     String
-  function   Function @relation(fields: [functionId], references: [id])
-  functionId String
-}
-
-model Function {
-  id          String       @id @default(cuid())
-  name        String
-  permissions Permission[]
-}
-
-model Account {
-  id            String   @id @default(cuid())
-  code          String   @unique
-  name          String
-  category      String   // 売上原価、販管費など
-  isActive      Boolean  @default(true)
-  budgets       Budget[]
-  actuals       Actual[]
-}
-
-model Vendor {
-  id                  String   @id @default(cuid())
-  code                String?  @unique
-  name                String
-  freeeAuxAccountName String?
-  isActive            Boolean  @default(true)
-  budgets             Budget[]
-  actuals             Actual[]
-}
-
-model FluctuationFactor {
-  id          String           @id @default(cuid())
-  name        String
-  unit        String
-  forecasts   FactorForecast[]
-  budgets     Budget[]
-}
-
-model FactorForecast {
-  id          String            @id @default(cuid())
-  factor      FluctuationFactor @relation(fields: [factorId], references: [id])
-  factorId    String
-  yearMonth   Int               // YYYYMM形式
-  forecastValue Float
-}
-
+// システムログテーブル
 model SystemLog {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   timestamp   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  actionType  String
+  user        User     @relation(fields: [user_id], references: [id])
+  user_id     String
+  action_type String
   details     String?
-} 
+
+  @@map("system_logs")
+}

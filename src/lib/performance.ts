@@ -121,4 +121,22 @@ export function withPerformanceMonitoring<P extends object>(
 
     return result;
   };
-} 
+}
+
+/**
+ * 関数の実行時間を計測し、ログに記録します
+ * @param functionName 関数名
+ * @param startTime 開始時間
+ */
+export const monitorPerformance = (functionName: string, startTime: number): void => {
+  const endTime = performance.now();
+  const executionTime = endTime - startTime;
+  
+  // 実行時間が100msを超える場合は警告ログを出力
+  if (executionTime > 100) {
+    console.warn(`Performance warning: ${functionName} took ${executionTime.toFixed(2)}ms to execute`);
+  }
+  
+  // 実行時間をログに記録
+  console.log(`Performance: ${functionName} - ${executionTime.toFixed(2)}ms`);
+}; 

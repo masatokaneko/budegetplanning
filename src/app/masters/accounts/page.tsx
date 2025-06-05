@@ -1,9 +1,17 @@
 import React from 'react'
 import { DataGrid } from '@/components/data-grid/DataGrid'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/Card'
 import { Modal } from '@/components/ui/Modal'
 import { Form, FormField } from '@/components/ui/Form'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 interface Account {
   id: string

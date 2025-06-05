@@ -5,6 +5,14 @@ import { Card } from '@/components/ui/Card'
 import { Chart } from '@/components/ui/chart'
 import { useBudget } from '@/hooks/useBudget'
 import { useActual } from '@/hooks/useActual'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 export default function AnalysisPage() {
   const { budgets } = useBudget()

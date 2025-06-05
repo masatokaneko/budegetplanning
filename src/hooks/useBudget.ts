@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useCallback, useEffect } from 'react';
 import { mockBudgets, mockBudgetGridData, mockFactorForecasts, mockBudgetVersions } from '@/data/mock/budgets';
 import { mockAccounts, mockVendors } from '@/data/mock/masterData';
@@ -21,6 +23,7 @@ interface UseBudgetReturn {
   versions: BudgetVersion[];
   loading: boolean;
   error: Error | null;
+  getGridData: () => BudgetGridData[];
   fetchBudgets: (yearMonth?: string) => Promise<void>;
   generateGridData: (budgets: Budget[]) => BudgetGridData[];
   calculateFactorLinkedBudget: (request: BudgetCalculationRequest) => Promise<number>;
@@ -340,6 +343,7 @@ export const useBudget = (): UseBudgetReturn => {
     versions,
     loading,
     error,
+    getGridData: () => gridData,
     fetchBudgets,
     generateGridData,
     calculateFactorLinkedBudget,

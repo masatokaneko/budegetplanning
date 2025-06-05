@@ -1,5 +1,5 @@
 {
-  "name": "budget-management-system",
+  "name": "cost-budget-planning",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,46 +7,58 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest",
-    "db:migrate": "prisma migrate dev",
-    "db:generate": "prisma generate",
-    "db:studio": "prisma studio"
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "ts-node prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@hookform/resolvers": "^5.0.1",
-    "@prisma/client": "^5.10.0",
+    "@mui/icons-material": "^7.1.1",
+    "@prisma/client": "^5.10.2",
     "@radix-ui/react-progress": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@tanstack/react-query": "^5.80.5",
     "@tanstack/react-table": "^8.13.2",
     "@tanstack/react-virtual": "^3.13.9",
+    "@types/node": "^20.11.24",
+    "@types/papaparse": "^5.3.16",
+    "@types/react": "^18.2.61",
+    "@types/react-dom": "^18.2.19",
+    "autoprefixer": "^10.4.18",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "next": "14.1.0",
+    "papaparse": "^5.5.3",
+    "postcss": "^8.4.35",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.57.0",
     "recharts": "^2.15.3",
     "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.3.3",
+    "xlsx": "^0.18.5",
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.3.3",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^20.11.19",
-    "@types/react": "^18.2.57",
-    "@types/react-dom": "^18.2.19",
-    "autoprefixer": "^10.4.17",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.1.0",
     "jest": "^29.7.0",
     "msw": "^2.9.0",
-    "postcss": "^8.4.35",
-    "prisma": "^5.10.0",
+    "prisma": "^5.10.2",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.3.3"
+    "ts-node": "^10.9.2"
   }
 }

@@ -1,5 +1,13 @@
 import React from 'react';
 import { Button } from './Button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface ModalProps {
   isOpen: boolean;

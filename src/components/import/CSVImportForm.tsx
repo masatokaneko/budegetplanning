@@ -1,6 +1,14 @@
 import React from 'react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface CSVImportFormProps {
   onFileSelect: (file: File) => void;

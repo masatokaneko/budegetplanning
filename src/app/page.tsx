@@ -2,6 +2,14 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { BudgetActualChart } from '@/components/charts/BudgetActualChart';
 import { ProgressBar } from '@/components/charts/ProgressBar';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export default function Home() {
   return (

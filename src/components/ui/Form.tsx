@@ -1,6 +1,14 @@
 import React from 'react'
 import { Input } from './Input'
 import { Select } from './Select'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 interface FormFieldProps {
   label: string

@@ -1,9 +1,17 @@
 import React from 'react'
 import { DataGrid } from '@/components/data-grid/DataGrid'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/Card'
 import { useActual } from '@/hooks/useActual'
 import { Actual } from '@/types/actual'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 export default function ActualsPage() {
   const { actuals, loading, error } = useActual()
@@ -19,9 +27,9 @@ export default function ActualsPage() {
     },
     {
       header: '実績額',
-      accessorKey: 'amount',
+      accessorKey: 'actual_amount',
       cell: ({ row }: { row: { original: Actual } }) => (
-        <span>¥{row.original.amount.toLocaleString()}</span>
+        <span>¥{row.original.actual_amount.toLocaleString()}</span>
       ),
     },
     {
@@ -30,9 +38,9 @@ export default function ActualsPage() {
     },
     {
       header: '登録日',
-      accessorKey: 'createdAt',
+      accessorKey: 'created_at',
       cell: ({ row }: { row: { original: Actual } }) => (
-        <span>{new Date(row.original.createdAt).toLocaleDateString()}</span>
+        <span>{new Date(row.original.created_at).toLocaleDateString()}</span>
       ),
     },
   ]

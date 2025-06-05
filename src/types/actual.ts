@@ -2,25 +2,19 @@
 // 実績関連の型定義
 
 export type Actual = {
-  id: string
-  year: number
-  month: number
-  department: string
-  category: string
-  amount: number
-  description?: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-export type ActualSummary = {
-  department: string
-  category: string
-  totalAmount: number
-  averageAmount: number
-  lastMonthAmount: number
-  trend: 'up' | 'down' | 'stable'
-  percentageChange: number
+  actual_id: string;
+  account_id: string;
+  account_name: string;
+  account_type: 'cost_of_sales' | 'selling_admin';
+  vendor_id?: string;
+  vendor_name?: string;
+  transaction_date: Date;
+  year_month: string;
+  actual_amount: number;
+  description?: string;
+  source_file_name: string;
+  imported_at: Date;
+  created_at: Date;
 }
 
 export interface ActualInput {

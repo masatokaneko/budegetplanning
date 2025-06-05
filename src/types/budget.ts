@@ -192,7 +192,7 @@ export interface Actual {
   vendor_name?: string;
   transaction_date: Date;
   year_month: string;
-  amount: number;
+  actual_amount: number;
   description?: string;
   source_file?: string;
   imported_at?: Date;

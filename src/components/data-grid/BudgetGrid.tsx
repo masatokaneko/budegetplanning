@@ -12,7 +12,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/Table';
+} from '@/components/ui/table';
 import { Budget, BudgetStatus } from '@/types/budget';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { BUDGET_STATUS_LABELS } from '@/constants/budget';

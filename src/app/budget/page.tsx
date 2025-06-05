@@ -1,9 +1,17 @@
 import React from 'react'
 import { DataGrid } from '@/components/data-grid/DataGrid'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/Card'
 import { useBudget } from '@/hooks/useBudget'
 import { BudgetGridData } from '@/types/budget'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 export default function BudgetPage() {
   const { budgets, loading, error, getGridData } = useBudget()
@@ -19,26 +27,9 @@ export default function BudgetPage() {
     },
     {
       header: '予算額',
-      accessorKey: 'amount',
+      accessorKey: 'annual_total',
       cell: ({ row }: { row: { original: BudgetGridData } }) => (
-        <span>¥{row.original.amount.toLocaleString()}</span>
-      ),
-    },
-    {
-      header: 'ステータス',
-      accessorKey: 'status',
-      cell: ({ row }: { row: { original: BudgetGridData } }) => (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-          ${row.original.status === 'approved' ? 'bg-green-100 text-green-800' :
-            row.original.status === 'rejected' ? 'bg-red-100 text-red-800' :
-            row.original.status === 'submitted' ? 'bg-blue-100 text-blue-800' :
-            'bg-gray-100 text-gray-800'}`}
-        >
-          {row.original.status === 'approved' ? '承認済' :
-           row.original.status === 'rejected' ? '却下' :
-           row.original.status === 'submitted' ? '申請中' :
-           '下書き'}
-        </span>
+        <span>¥{row.original.annual_total.toLocaleString()}</span>
       ),
     },
     {
@@ -50,6 +41,8 @@ export default function BudgetPage() {
       accessorKey: 'approvedBy',
     },
   ]
+
+  const data = getGridData();
 
   return (
     <div className="space-y-6">
@@ -71,7 +64,7 @@ export default function BudgetPage() {
             <div className="text-red-500">エラーが発生しました: {error.message}</div>
           ) : (
             <DataGrid
-              data={getGridData(budgets)}
+              data={data}
               columns={columns}
               pageSize={10}
             />

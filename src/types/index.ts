@@ -37,7 +37,7 @@ export interface Actual extends BaseEntity {
   month: number;
   department: string;
   category: string;
-  amount: number;
+  actual_amount: number;
   description?: string;
   recordedAt: Date;
   recordedBy: string;

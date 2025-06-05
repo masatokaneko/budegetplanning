@@ -62,4 +62,4 @@ npm run build
 ```
 
 ## ライセンス
-MIT 
+MIT

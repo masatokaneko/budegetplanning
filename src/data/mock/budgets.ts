@@ -1,0 +1,48 @@
+import { Budget } from '@/types';
+
+export const mockBudgets: Budget[] = [
+  {
+    id: '1',
+    fiscalYear: 2024,
+    department: '経営企画部',
+    category: '人件費',
+    amount: 50000000,
+    status: 'approved',
+    createdBy: '1',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-15'),
+  },
+  {
+    id: '2',
+    fiscalYear: 2024,
+    department: '経営企画部',
+    category: '旅費交通費',
+    amount: 2000000,
+    status: 'approved',
+    createdBy: '1',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-15'),
+  },
+  {
+    id: '3',
+    fiscalYear: 2024,
+    department: '財務部',
+    category: '人件費',
+    amount: 30000000,
+    status: 'submitted',
+    createdBy: '2',
+    createdAt: new Date('2024-01-02'),
+    updatedAt: new Date('2024-01-16'),
+  },
+  {
+    id: '4',
+    fiscalYear: 2024,
+    department: '営業部',
+    category: '接待交際費',
+    amount: 10000000,
+    status: 'draft',
+    createdBy: '3',
+    createdAt: new Date('2024-01-03'),
+    updatedAt: new Date('2024-01-03'),
+  },
+]; 

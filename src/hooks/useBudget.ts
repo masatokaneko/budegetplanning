@@ -48,9 +48,17 @@ export const useBudget = (): UseBudgetReturn => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const data = JSON.parse(stored);
-        setBudgets(data.budgets);
+        setBudgets(data.budgets.map((b: any) => ({
+          ...b,
+          created_at: new Date(b.created_at),
+          updated_at: new Date(b.updated_at)
+        })));
         setGridData(data.gridData);
-        setVersions(data.versions);
+        setVersions(data.versions.map((v: any) => ({
+          ...v,
+          created_at: new Date(v.created_at),
+          confirmed_at: v.confirmed_at ? new Date(v.confirmed_at) : undefined
+        })));
       } else {
         // 初期データの設定
         setBudgets(mockBudgets);
@@ -198,139 +206,129 @@ export const useBudget = (): UseBudgetReturn => {
   const createBudget = useCallback(async (budget: Omit<Budget, 'budget_id' | 'created_at' | 'updated_at'>) => {
     const startTime = performance.now();
     setLoading(true);
-    setError(null);
-
     try {
-      // 変動要因連動の場合、計算を実行
-      let amount = budget.budget_amount;
-      if (budget.calculation_type === 'factor_linked' && budget.linked_factor_id) {
-        amount = await calculateFactorLinkedBudget({
-          account_id: budget.account_id,
-          factor_id: budget.linked_factor_id,
-          basis_value: budget.basis_value || 0,
-          target_months: budget.year_month ? [budget.year_month] : []
-        });
-      }
-
       const newBudget: Budget = {
         ...budget,
-        budget_id: `bud_${Date.now()}`,
-        budget_amount: amount,
+        budget_id: `BUD${Date.now()}`,
         created_at: new Date(),
-        updated_at: new Date(),
+        updated_at: new Date()
       };
 
-      setBudgets(prev => [...prev, newBudget]);
-      logger.info('Budget created', { budgetId: newBudget.budget_id });
+      const updatedBudgets = [...budgets, newBudget];
+      setBudgets(updatedBudgets);
+      
+      // グリッドデータの更新
+      const updatedGridData = generateGridData(updatedBudgets);
+      
+      // ローカルストレージに保存
+      saveToStorage({
+        budgets: updatedBudgets,
+        gridData: updatedGridData,
+        versions
+      });
+
+      setError(null);
     } catch (err) {
+      logger.error('予算の作成に失敗しました', err);
       setError(err instanceof Error ? err : new Error('予算の作成に失敗しました'));
-      logger.error('Failed to create budget', { error: err });
     } finally {
       setLoading(false);
       monitorPerformance('createBudget', startTime);
     }
-  }, []);
+  }, [budgets, versions, generateGridData, saveToStorage]);
 
   // 予算の更新
   const updateBudget = useCallback(async (budget: Budget) => {
     const startTime = performance.now();
     setLoading(true);
-    setError(null);
-
     try {
-      // 変動要因連動の場合、計算を実行
-      let amount = budget.budget_amount;
-      if (budget.calculation_type === 'factor_linked' && budget.linked_factor_id) {
-        amount = await calculateFactorLinkedBudget({
-          account_id: budget.account_id,
-          factor_id: budget.linked_factor_id,
-          basis_value: budget.basis_value || 0,
-          target_months: budget.year_month ? [budget.year_month] : []
-        });
-      }
+      const updatedBudgets = budgets.map(b => 
+        b.budget_id === budget.budget_id ? { ...budget, updated_at: new Date() } : b
+      );
+      setBudgets(updatedBudgets);
+      
+      // グリッドデータの更新
+      const updatedGridData = generateGridData(updatedBudgets);
+      
+      // ローカルストレージに保存
+      saveToStorage({
+        budgets: updatedBudgets,
+        gridData: updatedGridData,
+        versions
+      });
 
-      const updatedBudget: Budget = {
-        ...budget,
-        budget_amount: amount,
-        updated_at: new Date(),
-      };
-
-      setBudgets(prev => prev.map(b => b.budget_id === budget.budget_id ? updatedBudget : b));
-      logger.info('Budget updated', { budgetId: budget.budget_id });
+      setError(null);
     } catch (err) {
+      logger.error('予算の更新に失敗しました', err);
       setError(err instanceof Error ? err : new Error('予算の更新に失敗しました'));
-      logger.error('Failed to update budget', { error: err });
     } finally {
       setLoading(false);
       monitorPerformance('updateBudget', startTime);
     }
-  }, []);
+  }, [budgets, versions, generateGridData, saveToStorage]);
 
   // 予算の削除
   const deleteBudget = useCallback(async (budgetId: string) => {
     const startTime = performance.now();
     setLoading(true);
-    setError(null);
-
     try {
-      setBudgets(prev => prev.filter(b => b.budget_id !== budgetId));
-      logger.info('Budget deleted', { budgetId });
+      const updatedBudgets = budgets.filter(b => b.budget_id !== budgetId);
+      setBudgets(updatedBudgets);
+      
+      // グリッドデータの更新
+      const updatedGridData = generateGridData(updatedBudgets);
+      
+      // ローカルストレージに保存
+      saveToStorage({
+        budgets: updatedBudgets,
+        gridData: updatedGridData,
+        versions
+      });
+
+      setError(null);
     } catch (err) {
+      logger.error('予算の削除に失敗しました', err);
       setError(err instanceof Error ? err : new Error('予算の削除に失敗しました'));
-      logger.error('Failed to delete budget', { error: err });
     } finally {
       setLoading(false);
       monitorPerformance('deleteBudget', startTime);
     }
-  }, []);
+  }, [budgets, versions, generateGridData, saveToStorage]);
 
   // 予算の確定
   const finalizeBudget = useCallback(async (versionId: string) => {
     const startTime = performance.now();
     setLoading(true);
-    setError(null);
-
     try {
-      // バージョンのステータスを更新
-      setVersions(prev => prev.map(v => 
-        v.version_id === versionId ? { ...v, is_confirmed: true } : v
-      ));
-
-      // 確定した予算をコピーして新しいバージョンを作成
-      const finalizedBudgets = budgets.filter(b => b.budget_version === versionId);
-      const newVersionId = `ver_${Date.now()}`;
+      const updatedVersions = versions.map(v => 
+        v.version_id === versionId ? { ...v, is_confirmed: true, confirmed_at: new Date() } : v
+      );
+      setVersions(updatedVersions);
       
-      const newBudgets = finalizedBudgets.map(b => ({
-        ...b,
-        budget_id: `bud_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        budget_version: newVersionId,
-        created_at: new Date(),
-        updated_at: new Date(),
-      }));
+      // ローカルストレージに保存
+      saveToStorage({
+        budgets,
+        gridData,
+        versions: updatedVersions
+      });
 
-      setBudgets(prev => [...prev, ...newBudgets]);
-      setVersions(prev => [...prev, {
-        version_id: newVersionId,
-        version_name: `Version ${newVersionId}`,
-        is_confirmed: false,
-        created_at: new Date(),
-        updated_at: new Date(),
-      }]);
-
-      logger.info('Budget finalized', { versionId, newVersionId });
+      setError(null);
     } catch (err) {
+      logger.error('予算の確定に失敗しました', err);
       setError(err instanceof Error ? err : new Error('予算の確定に失敗しました'));
-      logger.error('Failed to finalize budget', { error: err });
     } finally {
       setLoading(false);
       monitorPerformance('finalizeBudget', startTime);
     }
-  }, [budgets]);
+  }, [budgets, gridData, versions, saveToStorage]);
 
   // バージョン別の予算取得
-  const getBudgetByVersion = useCallback((versionId: string): Budget[] => {
+  const getBudgetByVersion = useCallback((versionId: string) => {
+    const version = versions.find(v => v.version_id === versionId);
+    if (!version) return [];
+
     return budgets.filter(b => b.budget_version === versionId);
-  }, [budgets]);
+  }, [budgets, versions]);
 
   // 初期データの読み込み
   useEffect(() => {
@@ -352,6 +350,6 @@ export const useBudget = (): UseBudgetReturn => {
     updateBudget,
     deleteBudget,
     finalizeBudget,
-    getBudgetByVersion,
+    getBudgetByVersion
   };
 }; 

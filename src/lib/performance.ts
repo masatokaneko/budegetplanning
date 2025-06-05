@@ -1,4 +1,5 @@
 import { logger } from './logger';
+import React from 'react';
 
 interface PerformanceMetric {
   name: string;
@@ -107,7 +108,7 @@ export function withPerformanceMonitoring<P extends object>(
   return function WithPerformanceMonitoring(props: P) {
     const startTime = performance.now();
 
-    const result = <WrappedComponent {...props} />;
+    const result = React.createElement(WrappedComponent, props);
 
     const endTime = performance.now();
     const duration = endTime - startTime;

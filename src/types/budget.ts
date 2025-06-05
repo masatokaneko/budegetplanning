@@ -182,3 +182,42 @@ export interface FluctuationFactor {
   updated_at: Date;
   created_by: string;
 }
+
+export interface Actual {
+  actual_id: string;
+  account_id: string;
+  account_name: string;
+  account_type: 'cost_of_sales' | 'selling_admin';
+  vendor_id?: string;
+  vendor_name?: string;
+  transaction_date: Date;
+  year_month: string;
+  amount: number;
+  description?: string;
+  source_file?: string;
+  imported_at?: Date;
+  created_at: Date;
+  updated_at: Date;
+  created_by: string;
+}
+
+export interface VarianceAnalysis {
+  account_id: string;
+  account_name: string;
+  account_type: 'cost_of_sales' | 'selling_admin';
+  year_month: string;
+  budget_amount: number;
+  actual_amount: number;
+  variance_amount: number;
+  variance_rate: number;
+  is_significant: boolean;
+}
+
+export interface KPIAnalysis {
+  year_month: string;
+  total_budget: number;
+  total_actual: number;
+  achievement_rate: number;
+  variance_rate: number;
+  significant_variances: VarianceAnalysis[];
+}
